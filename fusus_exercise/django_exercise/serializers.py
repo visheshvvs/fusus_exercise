@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-import socket
+from requests import get
 
 from .models import UserInfo
 from .models import Organization
@@ -51,7 +51,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ['username', 'organization_name', 'public_ip']
 
     def get_public_ip(self, obj):
-        return socket.gethostbyname(socket.gethostname())
+        return get('https://api.ipify.org').text
 
 
 class OrgSerializer(serializers.ModelSerializer):
