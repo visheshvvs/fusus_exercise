@@ -1,7 +1,10 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+import socket
 
 from .models import UserInfo
+from .models import Organization
+
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="userinfo.name")
@@ -21,3 +24,30 @@ class UserSerializer(serializers.ModelSerializer):
         UserInfo.objects.create(user=user, organization=current_user.userinfo.organization, name=validated_data.get("name"), phone=validated_data.get("phone"), birthdate=validated_data.get("birthdate"))
 
         return user
+
+
+class MinUserSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="userinfo.name", read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'name']
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source="userinfo.organization.name", read_only=True)
+    public_ip = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'organization_name', 'public_ip']
+
+    def get_public_ip(self, obj):
+        return socket.gethostbyname(socket.gethostname())
+
+
+class OrgSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Organization
+        fields = ['id', 'address', 'name', 'phone']
