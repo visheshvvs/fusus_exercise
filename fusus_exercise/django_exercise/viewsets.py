@@ -1,16 +1,21 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import mixins
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Organization
 from .filters import PhoneFilter
-from .serializers import OrgSerializer, MinUserSerializer, UserSerializer, UserInfoSerializer
+from .serializers import OrgSerializer, MinUserSerializer, UserSerializer, UserInfoSerializer, GroupSerializer
 
+
+class UserGroupViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated,]
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated,]
     queryset = User.objects.select_related("userinfo__organization")
     serializer_class = UserSerializer
     filterset_class = PhoneFilter
@@ -21,13 +26,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class OrgViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUser, ]
+    permission_classes = [IsAuthenticated,]
     queryset = Organization.objects.all()
     serializer_class = OrgSerializer
 
 
 class OrgUsersViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUser, ]
+    permission_classes = [IsAuthenticated,]
     serializer_class = MinUserSerializer
 
     def get_queryset(self):
@@ -35,7 +40,7 @@ class OrgUsersViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets
 
 
 class IPInfoViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated,]
     serializer_class = UserInfoSerializer
     queryset = User.objects.select_related("userinfo__organization")
 
